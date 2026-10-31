@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LoFiTube 2005 – แปลงวิดีโอให้เป็นคุณภาพต่ำ</title>
+<style>
+:root{--sky1:#2f7bd9;--sky2:#bfe0fb;--hill:#4c9a2a;--fg:#000;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky1:#0b2350;--sky2:#2a4f86;--hill:#1f4a14}}
+:root[data-theme="dark"]{--sky1:#0b2350;--sky2:#2a4f86;--hill:#1f4a14}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:14px 10px 40px;font:13px/1.4 Tahoma,Verdana,"Noto Sans Thai",sans-serif;color:var(--fg);min-height:100vh;
+ background:radial-gradient(130% 60% at 30% 108%,var(--hill) 60%,transparent 61%),linear-gradient(var(--sky1),var(--sky2) 80%)}
+.win{max-width:980px;margin:0 auto;border:3px solid #0831d9;border-top:0;border-radius:9px 9px 3px 3px;background:#ece9d8;box-shadow:4px 6px 0 rgba(0,0,0,.35)}
+.tb{display:flex;align-items:center;gap:6px;padding:5px 5px 5px 9px;color:#fff;font-weight:700;text-shadow:1px 1px #0a1f6b;border-radius:7px 7px 0 0;margin:0 -3px;
+ background:linear-gradient(#0a5cf0,#3d95ff 9%,#0058ee 30%,#0054e3 80%,#0a3fb8)}
+.tb span{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tb b{width:22px;height:22px;border:1px solid #fff;border-radius:4px;background:linear-gradient(#5f9bff,#1d52d6);display:grid;place-items:center;font-size:12px;text-shadow:none}
+.tb b:last-child{background:linear-gradient(#e8896c,#c3361a)}
+.menu{display:flex;flex-wrap:wrap;gap:14px;padding:3px 9px;border-bottom:1px solid #aca899;font-size:12px}
+.addr{display:flex;gap:6px;align-items:center;padding:4px 8px;border-bottom:1px solid #aca899}
+.addr i{flex:1;font-style:normal;background:#fff;border:1px solid #7f9db9;padding:2px 6px;overflow:hidden;white-space:nowrap}
+.xp,.go{font:inherit;background:linear-gradient(#fff,#ece9d8 85%,#d6d0c0);border:1px solid #003c74;border-radius:3px;padding:3px 12px;color:#000;cursor:pointer;min-height:24px}
+.xp:hover,.go:hover{box-shadow:inset 0 0 0 2px #f8b330}
+.xp:active{background:#d6d0c0}
+.xp:disabled{color:#888;border-color:#888;cursor:default;box-shadow:none}
+.xp:focus-visible,.pick:focus-within,select:focus-visible,input:focus-visible{outline:1px dotted #000;outline-offset:2px}
+.logo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;background:linear-gradient(#fff,#d6e6ff);border-bottom:3px solid #f58a00}
+.logo h1{margin:0;font:italic 700 34px/1 "Trebuchet MS",Tahoma,sans-serif;color:#1349b8;text-shadow:2px 2px #bcd0f5;letter-spacing:-1px}
+.logo h1 em{color:#f58a00}
+.logo small{display:block;font:12px Tahoma,sans-serif;font-style:normal;color:#333;text-shadow:none;letter-spacing:0;margin-top:3px}
+.mq{background:#000;color:#0f0;font:700 12px "Courier New",monospace;overflow:hidden;white-space:nowrap;padding:2px 0}
+.mq span{display:inline-block;padding-left:100%;animation:mq 22s linear infinite}
+@keyframes mq{to{transform:translateX(-100%)}}
+.body{display:flex;flex-wrap:wrap;gap:12px;padding:12px}
+.player{flex:1 1 340px;max-width:460px;margin:0 auto}
+.screen{background:#000;border:2px inset #fff;padding:0;position:relative}
+canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;background:#000}
+.ctl{display:flex;align-items:center;gap:8px;background:linear-gradient(#5a5a5a,#222);padding:5px 8px;color:#fff}
+.ctl .t{font:12px "Courier New",monospace;min-width:76px;text-align:right}
+.sk{position:relative;flex:1;height:10px;background:#111;border:1px solid #888}
+.sk i{display:block;height:100%;width:0;background:linear-gradient(#ffb347,#f58a00)}
+.sk input{position:absolute;left:0;right:0;top:-8px;bottom:-8px;width:100%;margin:0;opacity:0;cursor:pointer}
+.sk input:disabled{cursor:default}
+.stat{margin:8px 0 0;padding:6px 8px;background:#fffbd6;border:1px solid #c9b400;min-height:2.8em}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.btns .xp{flex:1;text-align:center;font-weight:700;display:grid;place-items:center}
+.pick{position:relative}.pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.set{flex:1 1 380px}
+fieldset{border:1px solid #aca899;border-radius:4px;margin:0 0 10px;padding:8px 10px 10px;background:#f6f4e9}
+legend{color:#0046d5;font-weight:700;padding:0 4px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 12px}
+label{display:block}label b{display:block;font-weight:400;margin-bottom:1px}
+select{width:100%;font:inherit;border:1px solid #7f9db9;background:#fff;padding:2px;height:23px}
+label.c{display:flex;gap:6px;align-items:center}
+.hint{font-size:12px;color:#444;margin:0}
+.out{margin:0 12px 12px;display:none}.out.on{display:block}
+.out video{display:block;width:100%;max-height:70vh;background:#000;border:2px inset #fff}
+.out .go{display:inline-block;margin-top:8px;text-decoration:none;font-weight:700;padding:5px 16px}
+.sbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;border-top:1px solid #aca899;padding:3px 8px;font-size:12px;background:#ece9d8}
+.cnt{font:700 13px "Courier New",monospace;background:#000;color:#0f0;padding:1px 5px;letter-spacing:2px}
+.bd{display:inline-block;border:1px solid #666;padding:0 5px;font-size:11px;background:#fff;margin-left:4px}
+.ie{display:inline-block;animation:none}body.busy .ie{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.mq span{animation:none;padding-left:8px}body.busy .ie{animation:none}}
+
+.xpbar{display:none;position:relative;height:20px;margin-top:8px;padding:2px;background:#fff;border:1px solid #686868;border-radius:3px}.xpbar.on{display:block}
+.xpbar .f{height:100%;width:0;background:repeating-linear-gradient(90deg,#2fc72f 0 8px,transparent 8px 10px);background-color:transparent}
+.xpbar span{position:absolute;inset:0;display:grid;place-items:center;font:700 11px Tahoma,sans-serif;color:#000;mix-blend-mode:normal;text-shadow:0 0 3px #fff,0 0 3px #fff}
+.foot{max-width:980px;margin:16px auto 0;text-align:center;font-size:12px;color:#fff;text-shadow:1px 1px 2px rgba(0,0,0,.75)}
+.foot a{color:#fff;text-decoration:underline;margin:0 8px;padding:4px 0;display:inline-block}.foot a:hover,.foot a[aria-current=page]{color:#ffe27a}
+
+
+
+.doc{display:none;margin:12px;padding:12px 16px;background:#f6f4e9;border:1px solid #aca899;border-radius:4px;max-width:760px}
+.doc.on{display:block}.doc h2{margin:0 0 8px;color:#0046d5;font:700 16px Tahoma,Verdana,sans-serif}.doc p{margin:0 0 8px}
+.hid{display:none!important}
+
+
+
+[data-theme="dark"] .doc{background:#32343b;border-color:#555}
+[data-theme="dark"] .doc h2{color:#8fb2ff}
+input[type=date]{width:100%;font:inherit;border:1px solid #7f9db9;background:#fff;padding:2px;height:23px}
+[data-theme="dark"] .xpbar{background:#1a1b1f;border-color:#8aa4d6}
+[data-theme="dark"] .xpbar span{color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+[data-theme="dark"] input[type=date]{background:#1a1b1f;color:#eee;border-color:#6a7ea8}
+.mq span::before,.mq span::after{content:"";display:inline-block;width:24px;height:24px;vertical-align:middle;margin:0 8px;background:url(data:image/gif;base64,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) center/contain no-repeat;image-rendering:pixelated}
+:root[data-theme="dark"]{--fg:#e6e6e6;color-scheme:dark}
+[data-theme="dark"] .win{background:#2b2d33;border-color:#1b3a8a}
+[data-theme="dark"] .tb{filter:brightness(.82)}
+[data-theme="dark"] .menu,[data-theme="dark"] .addr,[data-theme="dark"] .sbar{border-color:#555}
+[data-theme="dark"] .sbar{background:#2b2d33}
+[data-theme="dark"] .addr i{background:#1a1b1f;border-color:#555;color:#ddd}
+[data-theme="dark"] .xp,[data-theme="dark"] .go{background:linear-gradient(#4a4d55,#33353b);color:#eee;border-color:#8aa4d6}
+[data-theme="dark"] .xp:disabled{color:#777;border-color:#555}
+[data-theme="dark"] .logo{background:linear-gradient(#2f3340,#1f2a44)}
+[data-theme="dark"] .logo h1{color:#7fa8ff;text-shadow:2px 2px #0b1630}
+[data-theme="dark"] .logo small{color:#ccc}
+[data-theme="dark"] .bd{background:#1a1b1f;color:#ddd;border-color:#777}
+[data-theme="dark"] fieldset{background:#32343b;border-color:#555}
+[data-theme="dark"] legend{color:#8fb2ff}
+[data-theme="dark"] select{background:#1a1b1f;color:#eee;border-color:#6a7ea8}
+[data-theme="dark"] .hint{color:#bbb}
+[data-theme="dark"] .stat{background:#3b3820;border-color:#8a7a00;color:#f2ecb8}
+</style>
+</head>
+<body>
+<div class="win">
+ <div class="tb"><span>LoFiTube 2005 – WebVoyager 6.0</span><b>_</b><b>□</b><b>✕</b></div>
+ <div class="menu"><span data-en="File">ไฟล์</span><span data-en="Edit">แก้ไข</span><span data-en="View">มุมมอง</span><span data-en="Favorites">รายการโปรด</span><span data-en="Tools">เครื่องมือ</span><span data-en="Help">ช่วยเหลือ</span></div>
+ <div class="addr"><span data-en="Address">ที่อยู่</span><i>http://www.lofitube.com/crush.aspx</i><button class="xp" id="theme" aria-label="Dark mode">🌙</button><select id="lang" aria-label="Language" style="width:auto"><option value="th">ไทย</option><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option><option value="es">Español</option></select></div>
+ <div class="logo">
+  <h1>LoFi<em>Tube</em><small data-en="Turn any video into 2000s-internet quality. Everything runs inside your browser.">แปลงวิดีโอให้เป็นคุณภาพเน็ตยุค 2000 ประมวลผลในเครื่องคุณทั้งหมด</small></h1>
+  <span class="bd">Best viewed in WebVoyager 6.0 · 800×600</span>
+ </div>
+ <div class="mq"><span data-en="Welcome to LoFiTube! Upload a video, pick 56k modem mode, hit Convert, and enjoy the pixels ••• Please do not hotlink">ยินดีต้อนรับสู่ LoFiTube! เลือกวิดีโอ ตั้งโหมดโมเด็ม 56k แล้วกดแปลง สนุกกับพิกเซลได้เลย ••• ห้ามลิงก์ตรงนะจ๊ะ</span></div>
+
+ <div class="body" id="pn-main">
+  <section class="player">
+   <div class="screen"><canvas id="cv" width="320" height="240"></canvas></div>
+   <div class="ctl"><span>▶</span><div class="sk"><i id="prog"></i><input type="range" id="seek" min="0" max="1000" value="0" disabled aria-label="Seek"></div><span class="t" id="time">0:00 / 0:00</span><button class="xp" id="mute" aria-pressed="false" style="min-height:20px;padding:0 6px">🔊</button></div>
+   <p class="stat" id="status"></p>
+   <div class="xpbar" id="pbw" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="f" id="pfill"></div><span id="ppct">0%</span></div>
+   <div class="btns">
+    <label class="xp pick" data-en2="1"><span data-en="Choose video…">เลือกไฟล์วิดีโอ…</span><input type="file" id="file" accept="video/*"></label>
+    <button class="xp" id="goBtn" disabled data-en="▶ Convert">▶ เริ่มแปลง</button>
+   </div>
+  </section>
+
+  <section class="set">
+   <fieldset><legend data-en="Quick preset">สไตล์สำเร็จรูป</legend>
+    <select id="preset">
+     <option value="p4" selected data-en="Default · 320×240 · 25 fps · 48 kHz">ค่าเริ่มต้น (Default) · 320×240 · 25 fps · เสียง 48 kHz</option>
+     <option value="p1" data-en="YouTube 2005 · 320×240 · 15 fps · 22 kHz">YouTube ปี 2005 · 320×240 · 15 fps · เสียง 22 kHz</option>
+     <option value="p2" data-en="56k modem RealPlayer · 160×120 · 8 fps · 8 kHz">โมเด็ม 56k RealPlayer · 160×120 · 8 fps · เสียง 8 kHz</option>
+     <option value="p3" data-en="Webcam / MySpace · 240×180 · 10 fps · loud mic">เว็บแคม/MySpace · 240×180 · 10 fps · ไมค์ดังแตก</option>
+     <option value="custom" data-en="Custom">กำหนดเอง</option>
+    </select></fieldset>
+   <fieldset><legend data-en="Video">ภาพ</legend><div class="g">
+    <label><b data-en="Resolution">ความละเอียด</b><select id="res"><option value="128x96">128×96</option><option value="160x120">160×120</option><option value="240x180">240×180</option><option value="320x240" selected>320×240</option></select></label>
+    <label><b data-en="Frame rate">เฟรมเรต</b><select id="fps"><option>5</option><option>8</option><option>10</option><option>12</option><option selected>15</option><option>24</option><option>25</option></select></label>
+    <label><b data-en="Colors">จำนวนสี</b><select id="pal"><option value="nat" data-en="Natural">สีธรรมชาติ</option><option value="c256" data-en="256 colors (GIF)">256 สี (GIF)</option><option value="c32" data-en="32 colors">32 สี</option><option value="g8" data-en="8-shade grayscale">ขาวดำ 8 เฉด</option></select></label>
+    <label><b data-en="Video bitrate">บิตเรตวิดีโอ</b><select id="vbr"><option value="32000">32 kbps</option><option value="64000">64 kbps</option><option value="128000">128 kbps</option><option value="300000" selected>300 kbps</option><option value="500000">500 kbps</option></select></label>
+    <label><b data-en="Framing">การจัดภาพ</b><select id="crop"><option value="cover" data-en="Crop to 4:3">ตัดขอบให้เต็ม 4:3</option><option value="contain" data-en="Full frame (bars)">เห็นภาพเต็ม (มีขอบดำ)</option><option value="stretch" data-en="Stretch to fill">ยืดให้เต็มจอ</option></select></label>
+    <label><b data-en="Output scale">ขนาดไฟล์ผลลัพธ์</b><select id="scale"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option><option value="4">4×</option></select></label>
+   </div></fieldset>
+   <fieldset><legend data-en="Audio">เสียง</legend><div class="g">
+    <label><b data-en="Sample rate">ความถี่เสียง</b><select id="arate"><option value="8000">8 kHz</option><option value="11025">11 kHz</option><option value="22050" selected>22 kHz</option><option value="48000" data-en="48 kHz (no reduction)">48 kHz (ไม่ลด)</option></select></label>
+    <label><b data-en="Bit depth">บิตเสียง</b><select id="bits"><option value="4">4</option><option value="6">6</option><option value="8" selected>8</option><option value="12">12</option></select></label>
+   </div></fieldset>
+   <fieldset><legend data-en="Effects">เอฟเฟกต์</legend><div class="g">
+    <label><b><span data-en="Blocky compression">ภาพเป็นบล็อกแบบโดนบีบอัด</span>: <span id="bkv">70</span>%</b><input type="range" id="blocky" min="0" max="100" step="5" value="70" style="width:100%;margin:0"></label>
+    <label class="c"><input type="checkbox" id="look" checked><span data-en="Cheap-camera color">สีเพี้ยนแบบกล้องราคาถูก</span></label>
+    <label class="c"><input type="checkbox" id="noise"><span data-en="Grain / noise">เม็ดสัญญาณรบกวน</span></label>
+    <label class="c"><input type="checkbox" id="wm" checked><span data-en="Website watermark">ลายน้ำเว็บ</span></label>
+    <div><label class="c"><input type="checkbox" id="date" checked><span data-en="Camera date stamp">วันที่กล้อง</span></label>
+    <input type="date" id="dval" value="2005-05-12" aria-label="Date" style="margin-top:4px"></div>
+    <label class="c"><input type="checkbox" id="loud"><span data-en="Loud and distorted audio">เสียงดังและแตก</span></label>
+   </div></fieldset>
+   <p class="hint" data-en="Conversion runs in real time (a 1-minute video takes 1 minute). Keep this tab open until it finishes.">แปลงแบบเรียลไทม์ (วิดีโอ 1 นาที ใช้เวลา 1 นาที) กรุณาเปิดแท็บนี้ค้างไว้จนเสร็จ</p>
+  </section>
+ </div>
+
+ <section class="out" id="out">
+  <fieldset><legend data-en="Result">ผลลัพธ์</legend>
+   <video id="rv" controls playsinline></video>
+   <p class="hint" id="info"></p>
+   <a class="go" id="dl" data-en="⬇ Download">⬇ ดาวน์โหลด</a>
+  </fieldset>
+ </section>
+
+ <section class="doc" id="pn-about"><h2 data-en="About LoFiTube">เกี่ยวกับ LoFiTube</h2>
+  <p data-en="LoFiTube turns any video into the grainy, blocky, low-bitrate look of the 2000s internet: 56k modems, early video sites and cheap webcams.">LoFiTube แปลงวิดีโอให้ออกมามีหน้าตาแบบเน็ตยุค 2000 คือภาพเป็นเม็ด เป็นบล็อก และบิตเรตต่ำ เหมือนโมเด็ม 56k เว็บวิดีโอยุคแรก และเว็บแคมราคาถูก</p>
+  <p data-en="It is a hobby project made for fun and nostalgia. It is not affiliated with, endorsed by, or a copy of any real website, browser or company. Product names in the presets only describe a style and belong to their owners.">เป็นโปรเจกต์งานอดิเรกที่ทำเพื่อความสนุกและความคิดถึง ไม่มีความเกี่ยวข้อง การรับรอง หรือเป็นสำเนาของเว็บไซต์ เบราว์เซอร์ หรือบริษัทใด ๆ ชื่อผลิตภัณฑ์ในพรีเซ็ตใช้เพื่ออ้างอิงสไตล์เท่านั้น และเป็นของเจ้าของแต่ละราย</p>
+  <p data-en="How it works: your browser plays the video, redraws every frame at a small size with compression-style effects, and records the result in real time. Nothing is uploaded.">ทำงานอย่างไร: เบราว์เซอร์เล่นวิดีโอ วาดแต่ละเฟรมใหม่ในขนาดเล็กพร้อมเอฟเฟกต์แบบการบีบอัด แล้วบันทึกผลแบบเรียลไทม์ ไม่มีการอัปโหลดอะไรเลย</p>
+  <p data-en="Tip: results depend on your browser. Chrome, Edge and Safari work best, and the output is MP4 or WebM.">เคล็ดลับ: ผลลัพธ์ขึ้นกับเบราว์เซอร์ Chrome, Edge และ Safari ใช้ได้ดีที่สุด ไฟล์ที่ได้เป็น MP4 หรือ WebM</p></section>
+ <section class="doc" id="pn-priv"><h2 data-en="Privacy &amp; terms">ความเป็นส่วนตัวและข้อกำหนด</h2>
+  <p data-en="Your videos stay on your device. All processing happens inside your browser, and files are never uploaded to any server.">วิดีโอของคุณอยู่ในเครื่องคุณเท่านั้น การประมวลผลทั้งหมดเกิดในเบราว์เซอร์ ไฟล์จะไม่ถูกอัปโหลดไปยังเซิร์ฟเวอร์ใด ๆ</p>
+  <p data-en="This page only keeps your language and theme choices in local browser storage. The page itself has no accounts, ads or trackers.">หน้านี้เก็บเฉพาะตัวเลือกภาษาและธีมไว้ในที่เก็บข้อมูลของเบราว์เซอร์ และไม่มีระบบบัญชี โฆษณา หรือตัวติดตามในตัวหน้านี้</p>
+  <p data-en="Only convert videos you own or have permission to use. You are responsible for respecting copyright and other people's rights.">แปลงเฉพาะวิดีโอที่คุณเป็นเจ้าของหรือได้รับอนุญาต คุณรับผิดชอบในการเคารพลิขสิทธิ์และสิทธิ์ของผู้อื่น</p>
+  <p data-en="The service is provided as is, with no warranty. Converted files may look or sound worse than the original, which is the point. Use at your own risk.">บริการนี้ให้ใช้ตามสภาพ ไม่มีการรับประกันใด ๆ ไฟล์ที่แปลงแล้วอาจดูหรือฟังแย่กว่าต้นฉบับ ซึ่งก็คือจุดประสงค์ของมัน ใช้ด้วยความเสี่ยงของคุณเอง</p>
+  <p data-en="Features and these terms may change at any time.">ฟีเจอร์และข้อกำหนดเหล่านี้อาจเปลี่ยนแปลงได้ทุกเมื่อ</p></section>
+
+ <div class="sbar"><span><span class="ie">🌐</span> <span id="sb" data-en="Done">เสร็จแล้ว</span></span><span><span data-en="You are visitor no.">คุณคือผู้เข้าชมคนที่</span> <span class="cnt">004821</span></span></div>
+</div>
+
+<nav class="foot"><a href="#" class="fl" data-t="main" data-en="Home">หน้าหลัก</a><a href="#about" class="fl" data-t="about" data-en="About">เกี่ยวกับ</a><a href="#privacy" class="fl" data-t="priv" data-en="Privacy &amp; terms">ความเป็นส่วนตัวและข้อกำหนด</a></nav>
+<video id="v" playsinline style="display:none"></video>
+<script>
+const $=id=>document.getElementById(id);
+const v=$('v'),cv=$('cv'),ctx=cv.getContext('2d',{willReadFrequently:true});
+const outCv=document.createElement('canvas'),octx=outCv.getContext('2d');
+outCv.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px';document.body.appendChild(outCv);
+const LV={c256:[8,8,4],c32:[4,4,2]};
+let S={},running=false,last=0,actx,hp,lp,proc,recDest,mon,mr,chunks=[],fname='video',cp,pre,sh,muted=false,lang='th';
+try{const l=localStorage.getItem('lang');if(['th','en','zh','ja','es'].includes(l))lang=l}catch(e){}
+const M={
+ idle:['เลือกไฟล์วิดีโอเพื่อเริ่มต้น','Choose a video file to begin'],
+ load:['กำลังโหลดไฟล์…','Loading file…'],
+ ready:['พร้อมแล้ว ลากแถบเพื่อดูตัวอย่าง แล้วกด “เริ่มแปลง”','Ready. Drag the bar to preview, then press “Convert”.'],
+ bad:['เบราว์เซอร์เปิดไฟล์นี้ไม่ได้ ลองใช้ MP4 (H.264/AAC) หรือ WebM ใน Chrome/Edge/Safari','This browser cannot open this file. Try MP4 (H.264/AAC) or WebM in Chrome, Edge or Safari.'],
+ run:['กำลังแปลง… อย่าสลับแท็บ','Converting… do not switch tabs'],
+ err:['เกิดข้อผิดพลาด: {0}','Error: {0}'],
+ size:['ขนาดไฟล์ {0} KB','File size {0} KB'],
+ done:['เสร็จแล้ว!','Done!']};
+const MSG={};
+const T=[['File','文件','ファイル','Archivo'],['Edit','编辑','編集','Editar'],['View','查看','表示','Ver'],['Favorites','收藏夹','お気に入り','Favoritos'],['Tools','工具','ツール','Herramientas'],['Help','帮助','ヘルプ','Ayuda'],['Address','地址','アドレス','Dirección'],
+['Turn any video into 2000s-internet quality. Everything runs inside your browser.','把任何视频变成 2000 年代网络画质。全部在您的浏览器中运行。','どんな動画も2000年代のネット画質に。すべてブラウザ内で処理されます。','Convierte cualquier vídeo a calidad de internet de los 2000. Todo se ejecuta en tu navegador.'],
+['Welcome to LoFiTube! Upload a video, pick 56k modem mode, hit Convert, and enjoy the pixels ••• Please do not hotlink','欢迎来到 LoFiTube！上传视频，选择 56k 调制解调器模式，点击转换，尽情享受像素吧 ••• 请勿盗链','LoFiTubeへようこそ！動画をアップロードして56kモデムモードを選び、変換を押してドット絵の世界を楽しもう ••• 直リンク禁止','¡Bienvenido a LoFiTube! Sube un vídeo, elige el modo módem 56k, pulsa Convertir y disfruta de los píxeles ••• No enlaces directamente'],
+['Choose video…','选择视频…','動画を選択…','Elegir vídeo…'],['▶ Convert','▶ 开始转换','▶ 変換開始','▶ Convertir'],['Quick preset','快速预设','プリセット','Ajuste rápido'],
+['YouTube 2005 · 320×240 · 15 fps · 22 kHz','YouTube 2005 年 · 320×240 · 15 fps · 22 kHz','YouTube 2005年 · 320×240 · 15 fps · 22 kHz','YouTube 2005 · 320×240 · 15 fps · 22 kHz'],
+['56k modem RealPlayer · 160×120 · 8 fps · 8 kHz','56k 调制解调器 RealPlayer · 160×120 · 8 fps · 8 kHz','56kモデム RealPlayer · 160×120 · 8 fps · 8 kHz','Módem 56k RealPlayer · 160×120 · 8 fps · 8 kHz'],
+['Webcam / MySpace · 240×180 · 10 fps · loud mic','网络摄像头 / MySpace · 240×180 · 10 fps · 麦克风破音','ウェブカメラ / MySpace · 240×180 · 10 fps · 大音量マイク','Webcam / MySpace · 240×180 · 10 fps · micro a todo volumen'],
+['Default · 320×240 · 25 fps · 48 kHz','默认 · 320×240 · 25 fps · 48 kHz','デフォルト · 320×240 · 25 fps · 48 kHz','Predeterminado · 320×240 · 25 fps · 48 kHz'],['Home','首页','ホーム','Inicio'],['Convert','转换','変換','Convertir'],['About','关于','このサイトについて','Acerca de'],['Privacy & terms','隐私与条款','プライバシーと利用規約','Privacidad y términos'],['About LoFiTube','关于 LoFiTube','LoFiTubeについて','Acerca de LoFiTube'],
+['LoFiTube turns any video into the grainy, blocky, low-bitrate look of the 2000s internet: 56k modems, early video sites and cheap webcams.','LoFiTube 能把任何视频变成 2000 年代网络的颗粒感、方块感和低码率画质，就像 56k 调制解调器、早期视频网站和廉价摄像头。','LoFiTubeは、どんな動画も2000年代のネットらしい粒状感・ブロックノイズ・低ビットレートの見た目に変えます。56kモデム、初期の動画サイト、安いウェブカメラの雰囲気です。','LoFiTube convierte cualquier vídeo en el aspecto granulado, pixelado y de baja tasa de bits de internet de los 2000: módems de 56k, primeras webs de vídeo y webcams baratas.'],
+['It is a hobby project made for fun and nostalgia. It is not affiliated with, endorsed by, or a copy of any real website, browser or company. Product names in the presets only describe a style and belong to their owners.','这是出于兴趣和怀旧而做的个人项目，与任何真实的网站、浏览器或公司无关，不代表其认可，也不是其副本。预设中的产品名称仅用于描述风格，归各自所有者所有。','楽しさと懐かしさのために作った趣味のプロジェクトです。実在のサイト、ブラウザ、企業とは無関係で、承認を受けたものでも複製でもありません。プリセット内の製品名はスタイルの説明のためだけに使われ、各所有者に帰属します。','Es un proyecto de afición hecho por diversión y nostalgia. No está afiliado, respaldado ni es una copia de ningún sitio web, navegador o empresa reales. Los nombres de productos en los ajustes solo describen un estilo y pertenecen a sus propietarios.'],
+['How it works: your browser plays the video, redraws every frame at a small size with compression-style effects, and records the result in real time. Nothing is uploaded.','工作原理：浏览器播放视频，以小尺寸重新绘制每一帧并加上类似压缩的效果，然后实时录制结果。不会上传任何内容。','仕組み：ブラウザが動画を再生し、各フレームを小さなサイズで圧縮風のエフェクトを付けて描き直し、結果をリアルタイムで録画します。何もアップロードされません。','Cómo funciona: tu navegador reproduce el vídeo, redibuja cada fotograma en tamaño pequeño con efectos de compresión y graba el resultado en tiempo real. No se sube nada.'],
+['Tip: results depend on your browser. Chrome, Edge and Safari work best, and the output is MP4 or WebM.','提示：效果取决于浏览器。Chrome、Edge 和 Safari 效果最好；输出为 MP4 或 WebM。','ヒント：結果はブラウザによって異なります。Chrome、Edge、Safariが最適で、出力はMP4またはWebMです。','Consejo: el resultado depende del navegador. Chrome, Edge y Safari funcionan mejor; la salida es MP4 o WebM.'],
+['Your videos stay on your device. All processing happens inside your browser, and files are never uploaded to any server.','您的视频只保留在您的设备上。所有处理都在浏览器内完成，文件绝不会上传到任何服务器。','動画はお使いの端末内にとどまります。処理はすべてブラウザ内で行われ、ファイルがサーバーにアップロードされることはありません。','Tus vídeos se quedan en tu dispositivo. Todo el procesamiento ocurre en el navegador y los archivos nunca se suben a ningún servidor.'],
+['This page only keeps your language and theme choices in local browser storage. The page itself has no accounts, ads or trackers.','本页面只在浏览器本地存储中保存您的语言和主题选择，本页面本身没有账号、广告或追踪器。','このページはブラウザのローカルストレージに言語とテーマの選択だけを保存します。このページ自体にアカウント、広告、トラッカーはありません。','Esta página solo guarda tu idioma y tema en el almacenamiento local del navegador. La propia página no usa cuentas, anuncios ni rastreadores.'],
+['Only convert videos you own or have permission to use. You are responsible for respecting copyright and other people\'s rights.','请只转换您拥有或获得授权的视频。您有责任尊重版权和他人的权利。','自分が所有している、または使用許可のある動画だけを変換してください。著作権や他者の権利を尊重する責任はあなたにあります。','Convierte solo vídeos que sean tuyos o tengas permiso para usar. Eres responsable de respetar los derechos de autor y los de otras personas.'],
+['The service is provided as is, with no warranty. Converted files may look or sound worse than the original, which is the point. Use at your own risk.','本服务按“现状”提供，不作任何保证。转换后的文件可能画质或音质更差，这正是它的目的。使用风险自负。','本サービスは現状のまま提供され、いかなる保証もありません。変換後のファイルは元より見た目や音が悪くなることがありますが、それが目的です。自己責任でご利用ください。','El servicio se ofrece «tal cual», sin garantía alguna. Los archivos convertidos pueden verse u oírse peor que el original; ese es el objetivo. Úsalo bajo tu propia responsabilidad.'],
+['Features and these terms may change at any time.','功能和这些条款可能随时变更。','機能やこれらの規約は予告なく変更されることがあります。','Las funciones y estas condiciones pueden cambiar en cualquier momento.'],
+['Custom','自定义','カスタム','Personalizado'],['Video','视频','映像','Vídeo'],['Resolution','分辨率','解像度','Resolución'],['Frame rate','帧率','フレームレート','Fotogramas por segundo'],['Colors','颜色数','色数','Colores'],['Natural','自然色','ナチュラル','Natural'],
+['256 colors (GIF)','256 色 (GIF)','256色 (GIF)','256 colores (GIF)'],['32 colors','32 色','32色','32 colores'],['8-shade grayscale','8 级灰度','8階調グレー','Grises de 8 tonos'],['Video bitrate','视频码率','映像ビットレート','Tasa de bits del vídeo'],
+['Framing','画面裁切','フレーミング','Encuadre'],['Crop to 4:3','裁切为 4:3','4:3にトリミング','Recortar a 4:3'],['Stretch to fill','拉伸填满','画面に合わせて引き伸ばす','Estirar para llenar'],['Full frame (bars)','完整画面（黑边）','全体表示（黒帯あり）','Imagen completa (bandas)'],['Output scale','输出倍数','出力倍率','Escala de salida'],
+['Audio','音频','音声','Audio'],['Sample rate','采样率','サンプリングレート','Frecuencia de muestreo'],['48 kHz (no reduction)','48 kHz（不降低）','48 kHz（劣化なし）','48 kHz (sin reducir)'],['Bit depth','位深','ビット深度','Profundidad de bits'],
+['Effects','特效','エフェクト','Efectos'],['Blocky compression','压缩方块效应','ブロックノイズ圧縮','Compresión en bloques'],['Cheap-camera color','廉价相机色彩','安カメラ風の色','Color de cámara barata'],['Grain / noise','颗粒噪点','粒状ノイズ','Grano / ruido'],
+['Loud and distorted audio','大音量破音','大音量で音割れ','Audio alto y distorsionado'],['Website watermark','网站水印','サイト透かし','Marca de agua web'],['Camera date stamp','相机日期戳','カメラ日付','Fecha de cámara'],
+['Conversion runs in real time (a 1-minute video takes 1 minute). Keep this tab open until it finishes.','转换为实时进行（1 分钟的视频需要 1 分钟）。请保持此标签页打开直到完成。','変換はリアルタイムで行われます（1分の動画は1分かかります）。完了までこのタブを開いたままにしてください。','La conversión es en tiempo real (un vídeo de 1 minuto tarda 1 minuto). Mantén esta pestaña abierta hasta que termine.'],
+['Result','结果','結果','Resultado'],['⬇ Download','⬇ 下载','⬇ ダウンロード','⬇ Descargar'],['Done','完成','完了','Listo'],['You are visitor no.','您是第几位访客','あなたは次の訪問者です','Eres el visitante n.º'],
+['Opening page… (modem noises)','正在打开页面…（调制解调器噪音）','ページを開いています…（モデム音）','Abriendo página… (ruidos de módem)']];
+const TR={zh:{},ja:{},es:{}};T.forEach(r=>{TR.zh[r[0]]=r[1];TR.ja[r[0]]=r[2];TR.es[r[0]]=r[3]});
+const tr=k=>(TR[lang]&&TR[lang][k])||k;
+const MX={
+ zh:{idle:'选择视频文件开始',load:'正在加载文件…',ready:'准备就绪。拖动进度条预览，然后点击“开始转换”。',bad:'此浏览器无法打开该文件。请在 Chrome、Edge 或 Safari 中尝试 MP4 (H.264/AAC) 或 WebM。',run:'正在转换… 请勿切换标签页',err:'出错：{0}',size:'文件大小 {0} KB',done:'完成！'},
+ ja:{idle:'動画ファイルを選択して開始',load:'ファイルを読み込み中…',ready:'準備完了。バーをドラッグしてプレビューし、「変換開始」を押してください。',bad:'このブラウザではファイルを開けません。Chrome、Edge、SafariでMP4 (H.264/AAC) かWebMをお試しください。',run:'変換中… タブを切り替えないでください',err:'エラー：{0}',size:'ファイルサイズ {0} KB',done:'完了！'},
+ es:{idle:'Elige un archivo de vídeo para empezar',load:'Cargando archivo…',ready:'Listo. Arrastra la barra para previsualizar y pulsa «Convertir».',bad:'Este navegador no puede abrir el archivo. Prueba MP4 (H.264/AAC) o WebM en Chrome, Edge o Safari.',run:'Convirtiendo… no cambies de pestaña',err:'Error: {0}',size:'Tamaño del archivo {0} KB',done:'¡Listo!'}};
+function setMsg(id,k,a){MSG[id]=[k,a];renderMsg(id)}
+function renderMsg(id){const m=MSG[id];if(!m)return;$(id).textContent=(MX[lang]?MX[lang][m[0]]:M[m[0]][lang==='en'?1:0]).replace('{0}',m[1]??'')}
+function applyLang(){
+  document.querySelectorAll('[data-en]').forEach(e=>{if(e.dataset.th==null)e.dataset.th=e.textContent;e.textContent=lang==='th'?e.dataset.th:lang==='en'?e.dataset.en:tr(e.dataset.en)});
+  document.documentElement.lang=lang;$('lang').value=lang;
+  
+  renderMsg('status');renderMsg('info');
+}
+$('lang').onchange=()=>{lang=$('lang').value;try{localStorage.setItem('lang',lang)}catch(e){}applyLang()};
+
+function readSettings(){
+  const [w,h]=$('res').value.split('x').map(Number);
+  S={w,h,fps:+$('fps').value,pal:$('pal').value,arate:+$('arate').value,bits:+$('bits').value,vbr:+$('vbr').value,crop:$('crop').value,scale:+$('scale').value,
+     blocky:+$('blocky').value,look:$('look').checked,noise:$('noise').checked,wm:$('wm').checked,date:$('date').checked,dval:$('dval').value,aloud:$('loud').checked};
+}
+function sizeCanvas(){readSettings();cv.width=S.w;cv.height=S.h;outCv.width=S.w*S.scale;outCv.height=S.h*S.scale}
+
+function draw(){
+  const w=S.w,h=S.h,vw=v.videoWidth||w,vh=v.videoHeight||h;
+  ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);
+  const s=S.crop==='cover'?Math.max(w/vw,h/vh):Math.min(w/vw,h/vh),dw=S.crop==='stretch'?w:vw*s,dh=S.crop==='stretch'?h:vh*s;
+  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='low';
+  ctx.drawImage(v,(w-dw)/2,(h-dh)/2,dw,dh);
+  const img=ctx.getImageData(0,0,w,h),d=img.data;
+  if(S.blocky){
+    const bs=Math.max(3,Math.round(w/40*(.5+S.blocky/100))),k=1-S.blocky/100*.85;
+    for(let by=0;by<h;by+=bs)for(let bx=0;bx<w;bx+=bs){
+      const ye=Math.min(h,by+bs),xe=Math.min(w,bx+bs);let r=0,g=0,b=0,n=0;
+      for(let y=by;y<ye;y++)for(let x=bx;x<xe;x++){const i=(y*w+x)*4;r+=d[i];g+=d[i+1];b+=d[i+2];n++}
+      r/=n;g/=n;b/=n;
+      for(let y=by;y<ye;y++)for(let x=bx;x<xe;x++){const i=(y*w+x)*4;d[i]=r+(d[i]-r)*k;d[i+1]=g+(d[i+1]-g)*k;d[i+2]=b+(d[i+2]-b)*k}
+    }
+  }
+  const lv=LV[S.pal],gray=S.pal==='g8';
+  for(let i=0;i<d.length;i+=4){
+    let r=d[i],g=d[i+1],b=d[i+2];
+    if(S.look){const l=.299*r+.587*g+.114*b;r=(l+(r-l)*1.3-128)*1.15+128;g=(l+(g-l)*1.3-128)*1.15+128;b=(l+(b-l)*1.3-128)*1.15+128;r*=1.06;b*=.9}
+    if(S.noise){const n=(Math.random()-.5)*34;r+=n;g+=n;b+=n}
+    if(gray){const l=.299*r+.587*g+.114*b,q=Math.round(Math.max(0,Math.min(255,l))/255*7)/7*255;r=g=b=q}
+    else if(lv){r=Math.round(Math.max(0,Math.min(255,r))/255*(lv[0]-1))/(lv[0]-1)*255;g=Math.round(Math.max(0,Math.min(255,g))/255*(lv[1]-1))/(lv[1]-1)*255;b=Math.round(Math.max(0,Math.min(255,b))/255*(lv[2]-1))/(lv[2]-1)*255}
+    d[i]=r;d[i+1]=g;d[i+2]=b;
+  }
+  ctx.putImageData(img,0,0);
+  if(S.wm||S.date){
+    const fs=Math.max(8,Math.round(h/16));ctx.font='bold '+fs+'px Tahoma,Verdana,sans-serif';ctx.textBaseline='top';
+    const t1='www.lofitube.com',m=(S.dval||'').match(/^(\d{4})-(\d\d)-(\d\d)$/),t2=m?m[3]+'/'+m[2]+'/'+m[1]:'12/05/2005';
+    if(S.wm){ctx.fillStyle='#000';ctx.textAlign='right';ctx.fillText(t1,w-3,h-fs-2);ctx.fillText(t1,w-5,h-fs-4);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(t1,w-4,h-fs-3);}
+    if(S.date){ctx.textAlign='left';ctx.fillStyle='#000';ctx.fillText(t2,5,5);ctx.fillStyle='#ffb000';ctx.fillText(t2,4,4);}
+  }
+  octx.imageSmoothingEnabled=false;octx.drawImage(cv,0,0,outCv.width,outCv.height);
+}
+
+const PRESETS={
+ p1:{scale:'2',res:'320x240',fps:'15',pal:'nat',arate:'22050',bits:'8',vbr:'300000',blocky:70,look:1,noise:0,wm:1,date:1,loud:0},
+ p2:{scale:'4',res:'160x120',fps:'8',pal:'c256',arate:'8000',bits:'6',vbr:'32000',blocky:90,look:1,noise:1,wm:0,date:0,loud:0},
+ p3:{scale:'3',res:'240x180',fps:'10',pal:'nat',arate:'11025',bits:'8',vbr:'64000',blocky:60,look:1,noise:1,wm:0,date:0,loud:1},
+ p4:{scale:'1',res:'320x240',fps:'25',pal:'nat',arate:'48000',bits:'12',vbr:'500000',blocky:10,look:0,noise:0,wm:0,date:0,loud:0}};
+function refresh(){if(running)return;if(v.src){sizeCanvas();draw()}else idle()}
+$('dval').addEventListener('input',refresh);$('date').addEventListener('change',()=>{$('dval').disabled=!$('date').checked});$('blocky').addEventListener('input',()=>{$('bkv').textContent=$('blocky').value;$('preset').value='custom';refresh()});$('preset').onchange=()=>{const q=PRESETS[$('preset').value];if(!q)return;
+  for(const k of ['scale','res','fps','pal','arate','bits','vbr'])$(k).value=q[k];
+  $('blocky').value=q.blocky;$('bkv').textContent=q.blocky;for(const k of ['look','noise','wm','date','loud'])$(k).checked=!!q[k];refresh()};
+['res','fps','pal','crop','blocky','look','noise','wm','date'].forEach(id=>$(id).addEventListener('change',()=>{if(id!=='fps')$('preset').value='custom';refresh()}));
+
+function tuneAudio(){
+  const c=new Float32Array(1024);
+  for(let i=0;i<1024;i++){const x=i/511.5-1;c[i]=S.aloud?x:Math.tanh(2.5*x)/Math.tanh(2.5)}
+  sh.curve=c;pre.gain.value=S.aloud?2.6:1.4;
+  if(S.aloud){cp.threshold.value=0;cp.ratio.value=1}else{cp.threshold.value=-28;cp.ratio.value=6}
+  const full=S.arate>=44100;hp.frequency.value=full?20:80;lp.frequency.value=full?20000:Math.min(3400*(S.arate/8000>1.5?2.5:1),S.arate/2*.9);
+}
+function initAudio(){
+  if(actx)return;
+  actx=new (window.AudioContext||window.webkitAudioContext)();
+  const src=actx.createMediaElementSource(v);
+  hp=actx.createBiquadFilter();hp.type='highpass';
+  lp=actx.createBiquadFilter();lp.type='lowpass';lp.Q.value=.7;
+  sh=actx.createWaveShaper();pre=actx.createGain();
+  proc=actx.createScriptProcessor(1024,1,1);
+  let hold=0,phase=0;
+  proc.onaudioprocess=e=>{
+    const a=e.inputBuffer.getChannelData(0),o=e.outputBuffer.getChannelData(0);
+    const step=actx.sampleRate/S.arate,lvl=Math.pow(2,S.bits-1);
+    for(let i=0;i<a.length;i++){phase+=1;if(phase>=step){phase-=step;hold=Math.round(a[i]*lvl)/lvl}o[i]=hold}
+  };
+  recDest=actx.createMediaStreamDestination();mon=actx.createGain();
+  cp=actx.createDynamicsCompressor();cp.attack.value=.003;cp.release.value=.15;
+  src.connect(hp);hp.connect(lp);lp.connect(cp);cp.connect(pre);pre.connect(sh);sh.connect(proc);
+  proc.connect(recDest);proc.connect(mon);mon.connect(actx.destination);
+}
+function bar(){const d=v.duration;if(!d||!isFinite(d))return;const p=Math.min(100,Math.round(v.currentTime/d*100));$('pfill').style.width=p+'%';$('ppct').textContent=p+'%';$('pbw').setAttribute('aria-valuenow',p)}
+function loop(t){
+  if(!running)return;
+  if(t-last>=1000/S.fps){last=t;draw();syncSeek();bar()}
+  requestAnimationFrame(loop);
+}
+const pickMime=()=>['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp8,opus','video/webm'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
+
+const seek=$('seek'),fmt=t=>{t=Math.max(0,t||0);return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')};
+function syncSeek(){
+  const d=v.duration;if(!d||!isFinite(d))return;
+  const p=Math.min(100,v.currentTime/d*100);$('prog').style.width=p+'%';seek.value=p*10;
+  $('time').textContent=fmt(v.currentTime)+' / '+fmt(d);
+}
+seek.oninput=()=>{if(running||!v.duration)return;v.currentTime=seek.value/1000*v.duration;$('prog').style.width=seek.value/10+'%'};
+$('mute').onclick=()=>{muted=!muted;if(mon)mon.gain.value=muted?0:.6;$('mute').textContent=muted?'🔇':'🔊';$('mute').setAttribute('aria-pressed',muted)};
+
+$('file').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  fname=f.name.replace(/\.[^.]+$/,'');$('goBtn').disabled=true;
+  v.onerror=()=>{$('goBtn').disabled=true;setMsg('status','bad')};
+  v.src=URL.createObjectURL(f);
+  v.onloadeddata=()=>{sizeCanvas();v.currentTime=.1;$('goBtn').disabled=false;seek.disabled=false;setMsg('status','ready')};
+  v.onseeked=()=>{if(!running){draw();syncSeek()}};
+  $('out').classList.remove('on');seek.disabled=true;seek.value=0;$('prog').style.width='0%';setMsg('status','load');
+};
+$('goBtn').onclick=async()=>{
+  try{
+    sizeCanvas();initAudio();await actx.resume();tuneAudio();mon.gain.value=muted?0:.6;
+    const mt=pickMime();
+    const stream=new MediaStream([...outCv.captureStream(S.fps).getVideoTracks(),...recDest.stream.getAudioTracks()]);
+    mr=new MediaRecorder(stream,{mimeType:mt||undefined,videoBitsPerSecond:Math.min(6e6,S.vbr*S.scale*S.scale),audioBitsPerSecond:S.arate>=44100?96000:S.arate>=22050?48000:16000});
+    chunks=[];mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};mr.onstop=finish;
+    v.currentTime=0;await v.play();
+    running=true;last=0;mr.start(500);document.body.classList.add('busy');
+    $('goBtn').disabled=true;seek.disabled=true;setMsg('status','run');$('pfill').style.width='0%';$('ppct').textContent='0%';$('pbw').classList.add('on');
+    $('sb').dataset.th='กำลังเปิดหน้า… (เสียงโมเด็ม)';$('sb').dataset.en='Opening page… (modem noises)';applyLang();
+    requestAnimationFrame(loop);
+  }catch(err){setMsg('status','err',err.message);$('pbw').classList.remove('on');running=false;seek.disabled=false;document.body.classList.remove('busy')}
+};
+v.onended=()=>{if(!running)return;running=false;$('prog').style.width='100%';$('pfill').style.width='100%';$('ppct').textContent='100%';setTimeout(()=>mr.stop(),300)};
+function finish(){
+  const type=(mr.mimeType||'video/webm').split(';')[0],blob=new Blob(chunks,{type}),url=URL.createObjectURL(blob);
+  $('rv').src=url;const dl=$('dl');dl.href=url;dl.download='lofi-'+fname+(type.includes('mp4')?'.mp4':'.webm');
+  setMsg('info','size',(blob.size/1024).toFixed(0));$('out').classList.add('on');setTab('main');requestAnimationFrame(()=>$('out').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}));
+  $('goBtn').disabled=false;seek.disabled=false;document.body.classList.remove('busy');$('pbw').classList.remove('on');setMsg('status','done');
+  $('sb').dataset.th='เสร็จแล้ว';$('sb').dataset.en='Done';applyLang();
+}
+function idle(){
+  sizeCanvas();ctx.fillStyle='#0000aa';ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold '+Math.max(10,Math.round(cv.height/9))+'px monospace';
+  ctx.fillText('NO SIGNAL',cv.width/2,cv.height/2);
+}
+let theme;try{theme=localStorage.getItem('theme')}catch(e){}
+if(theme!=='dark'&&theme!=='light')theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+function applyTheme(){document.documentElement.dataset.theme=theme;$('theme').textContent=theme==='dark'?'☀️':'🌙'}
+$('theme').onclick=()=>{theme=theme==='dark'?'light':'dark';try{localStorage.setItem('theme',theme)}catch(e){}applyTheme()};
+applyTheme();
+function setTab(t){document.querySelectorAll('.fl').forEach(b=>{b.setAttribute('aria-current',b.dataset.t===t?'page':'false')});$('pn-main').classList.toggle('hid',t!=='main');$('out').classList.toggle('hid',t!=='main');$('pn-about').classList.toggle('on',t==='about');$('pn-priv').classList.toggle('on',t==='priv')}
+document.querySelectorAll('.fl').forEach(b=>b.onclick=e=>{e.preventDefault();setTab(b.dataset.t);window.scrollTo({top:0,behavior:'smooth'})});
+setTab('main');$('preset').value='p4';$('preset').onchange();idle();setMsg('status','idle');applyLang();
+</script>
+</body>
+</html>
